@@ -40,7 +40,7 @@ class Service(models.Model):
         ('pending', 'در طی راه اندازی'),
         ('active', 'در حال کار'),
         ('suspended', 'نگهداری شده'),
-        ('terminated', 'ئاک شده'),
+        ('terminated', 'پاک شده'),
     ]
 
     PERIOD_CHOICES = [
@@ -52,7 +52,7 @@ class Service(models.Model):
     user = models.ForeignKey(User, models.DO_NOTHING)
     product_main = models.ForeignKey(Product, models.DO_NOTHING)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0])
-    reason = models.TextField(blant=True, null=True)
+    reason = models.TextField(blank=True, null=True)
     period = models.CharField(max_length=8, choices=PERIOD_CHOICES, default=PERIOD_CHOICES[0][0])
     created_at = models.DateTimeField(auto_now_add=True)
     delivered_at = models.DateTimeField(blank=True, null=True)

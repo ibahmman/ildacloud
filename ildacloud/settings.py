@@ -41,6 +41,10 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     'accounts',
+    'storearea',
+    'dashboard',
+    'services',
+    'financial',
 ]
 
 MIDDLEWARE = [
@@ -58,7 +62,9 @@ ROOT_URLCONF = 'ildacloud.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR/'templates'
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
