@@ -16,7 +16,7 @@ class Product(models.Model):
         ('usdt', 'تتر'),
     ]
 
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=20, unique=True)
     price_amount = models.FloatField()
     price_currency = models.CharField(max_length=5, choices=CURRENCY_CHOICES, default=CURRENCY_CHOICES[0][0])
 
@@ -33,6 +33,9 @@ class PCloud(Product):
     disc_space = models.IntegerField()
     traffic = models.IntegerField()
     bandwidth = models.IntegerField()
+
+    # class Meta:
+    #     unique_together = ['datacenter', 'location', 'name']
 
 
 class Service(models.Model):
@@ -54,6 +57,7 @@ class Service(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0])
     reason = models.TextField(blank=True, null=True)
     period = models.CharField(max_length=8, choices=PERIOD_CHOICES, default=PERIOD_CHOICES[0][0])
+    uptime = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     delivered_at = models.DateTimeField(blank=True, null=True)
     lastpay_at = models.DateTimeField(blank=True, null=True)
@@ -65,6 +69,8 @@ class Service(models.Model):
 class SCloud(Service):
     product_cloud = models.ForeignKey(PCloud, models.DO_NOTHING)
     cloud_id = models.TextField(blank=True, null=True)
+    cloud_ipv4 = models.TextField(max_length=15, blank=True, null=True)
+    cloud_ipv6 = models.TextField(max_length=39, blank=True, null=True)
     root_password = models.TextField(blank=True, null=True)
 
 
