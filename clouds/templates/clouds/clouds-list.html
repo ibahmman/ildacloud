@@ -4,80 +4,31 @@
 
 {% block inbody %}
 <div class="w-100 d-flex flex-column justify-content-around align-items-start">
-    <div id="last-notifications" class="w-100 d-flex flex-row">
-        <div id="last-actions" class="w-50 border-end p-3 text-end">
-            <span>last actions</span>
-
-            {% for action in last_7actions %}
-            <div id="a{{action.id}}" class="w-100 shadow shadow-sm rounded rounded-2 d-flex flex-row justify-content-around align-items-center alert alert-light">
-                <span>
-                    {% if action.service.address %}{{ action.service.address }}
-                    {% else %} 0.0.0.0 
-                    {% endif %}
-                </span>
-                <span>{% if action.text %}{{action.text }}{% else %} None {% endif %}</span>
-                <span>{% if action.user %}{{ action.user }}{% else %} anonymous {% endif %}</span>
-                <span>{% if action.datetime %}{{ action.datetime }}{% else %} 0000/00/00 {% endif %}</span>
-            </div>
-            {% endfor %}
-        </div>
-        <div id="last-tickets" class="w-50 p-3 text-end">
-            <span>last tickets</span>
-
-            {% for ticket in answered_tickets %}
-            <a id="t{{ticket.id}}" href="" class="w-100 shadow shadow-sm rounded rounded-2 d-flex flex-row justify-content-around align-items-center alert alert-light">
-                <span>
-                    {% if ticket.id %}{{ ticket.id }}
-                    {% else %} -- 
-                    {% endif %}
-                </span>
-                <span>
-                    {% if ticket.subject %}{{ticket.subject }}
-                    {% else %} None 
-                    {% endif %}
-                </span>
-                <span>
-                    {% if ticket.message_set.all %}{{ ticket.message_set.all.first.text }}
-                    {% else %} null 
-                    {% endif %}
-                </span>
-                <span>
-                    {% if ticket.message_set.all %}{{ ticket.message_set.all.first.created_at }}
-                    {% else %} 0000/00/00 
-                    {% endif %}
-                </span>
-            </a>
-            {% endfor %}
-        </div>
-    </div>
-
     <div id="active-services" class="w-100 d-flex flex-column text-end">
-        <span>active services</span>
-
-        {% for service in active_services %}
+        {% for cloud in clouds %}
         <div id="s{{services.id}}" class="w-100 shadow shadow-sm rounded rounded-2 d-flex flex-row justify-content-around align-items-center alert alert-light">
             <span>
-                {% if service.scloud.product_cloud.name %}{{ service.scloud.product_cloud.name }}
+                {% if cloud.product_cloud.name %}{{ cloud.product_cloud.name }}
                 {% else %} None 
                 {% endif %}
             </span>
             <span>
-                {% if service.scloud.cloud_id %}{{ service.scloud.cloud_ipv4 }}
+                {% if cloud.cloud_id %}{{ cloud.cloud_ipv4 }}
                 {% else %} 0.0.0.0 
                 {% endif %}
             </span>
             <span>
-                {% if service.uptime %}{{ service.uptime }}
+                {% if cloud.uptime %}{{ cloud.uptime }}
                 {% else %} -- 
                 {% endif %}
             </span>
-            <span>{% if service.product_main.price_amount %}{{ service.product_main.price_amount }}/{{ service.product_main.price_currency }}
+            <span>{% if cloud.product_main.price_amount %}{{ cloud.product_main.price_amount }}/{{ cloud.product_main.price_currency }}
                 {% else %} 0 CUC {% endif %}
             </span>
 
             <div id="service-actions" class="w-25 d-flex flex-row justify-content-around align-items-center">
                 <div id="service-status">
-                    {% if service.status is running %}
+                    {% if cloud.status is running %}
                     <a id="service-stop" href="">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stop" viewBox="0 0 16 16">
                             <path d="M3.5 5A1.5 1.5 0 0 1 5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11zM5 4.5a.5.5 0 0 0-.5.5v6a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5z"/>
@@ -106,7 +57,7 @@
                     </svg>
                 </a>
 
-                <a id="service-more" href="">
+                <a id="service-more" href="{% url 'clouds:cloud-detail' cloud.id %}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
                         <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
                     </svg>

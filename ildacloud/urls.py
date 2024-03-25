@@ -6,7 +6,8 @@ from . import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('my/', include('accounts.urls')),
-    path('dash/', include('dashboard.urls')),
+    path('dashboard/', include('dashboard.urls')),
+    path('clouds/', include('clouds.urls')),
     path('', include('storearea.urls')),
 ]
 

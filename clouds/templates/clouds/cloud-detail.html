@@ -1,0 +1,41 @@
+{% extends "bootstrap/main.html" %}
+{% block intitle %} {{ cloud.cloud_ipv4 }} {% endblock %}
+
+{% block inbody %}
+<div class="w-100 d-flex flex-column justify-content-around align-items-start">
+    <div class="w-100 d-flex flex-row justify-content-around align-items-center">
+        <span class="w-25">
+            {% if cloud.product_cloud.name %}{{ cloud.product_cloud.name }}
+            {% else %} None 
+            {% endif %}
+        </span>
+        <span class="w-25">
+            {% if cloud %}{{ cloud.created_at }}
+            {% else %} -- 
+            {% endif %}
+        </span>
+        <span class="w-25">
+            {% if cloud.lastpay_at %}{{ cloud.lastpay_at }}
+            {% else %} --
+            {% endif %}
+        </span>
+        <span class="w-25">
+            {% if cloud.product_main.price_amount %}{{ cloud.product_main.price_amount }}/{{ cloud.product_main.price_currency }} [{{cloud.get_period_display}}]
+            {% else %} 0 LUC
+            {% endif %}
+        </span>
+        <span class="w-25">
+            {% if cloud %}{{ cloud.get_status_display }}
+            {% else %} --
+            {% endif %}
+        </span>
+    </div>
+    <div class="w-100 d-flex flex-row justify-content-around align-items-center">
+        <span class="w-25">
+            {% if cloud %}{{ cloud.os }}
+            {% else %} --
+            {% endif %}
+        </span>
+    </div>
+</div>
+{% endblock %}

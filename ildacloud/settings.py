@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'storearea',
     'dashboard',
     'services',
+    'clouds',
     'financial',
     'tickets',
 ]
