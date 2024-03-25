@@ -1,7 +1,14 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404
-from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from .serializers import CloudSerializer
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView
+from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS, IsAdminUser
+from .serializers import CloudSerializer, ProductCloudSerializer
+
+
+class CloudProductsAPIView(ListCreateAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = ProductCloudSerializer
+    # model = serializer_class.Meta.model
+    queryset = serializer_class.Meta.model.objects.all()
 
 
 class CloudsAPIView(ListAPIView):
