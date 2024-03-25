@@ -4,16 +4,19 @@ from django.contrib.auth.models import User
 
 class Datacenter(models.Model):
     name = models.CharField(max_length=26, unique=True)
-    tag  = models.CharField(max_length=2, unique=True)
+    tag = models.CharField(max_length=2, unique=True)
+
 
 class Location(models.Model):
     name = models.CharField(max_length=26, unique=True)
-    tag  = models.CharField(max_length=2, unique=True)
+    tag = models.CharField(max_length=2, unique=True)
+
 
 class Product(models.Model):
 
     CURRENCY_CHOICES = [
         ('usdt', 'تتر'),
+        ('irt', 'تومان'),
     ]
 
     name = models.CharField(max_length=20)
@@ -22,7 +25,6 @@ class Product(models.Model):
 
     def __str__(self) -> str:
         return f'{self.name} amount: {self.price_amount}/{self.price_currency}'
-
 
 
 class PCloud(Product):
@@ -52,7 +54,7 @@ class Service(models.Model):
     user = models.ForeignKey(User, models.DO_NOTHING)
     product_main = models.ForeignKey(Product, models.DO_NOTHING)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0])
-    reason = models.TextField(blant=True, null=True)
+    reason = models.TextField(blank=True, null=True)
     period = models.CharField(max_length=8, choices=PERIOD_CHOICES, default=PERIOD_CHOICES[0][0])
     created_at = models.DateTimeField(auto_now_add=True)
     delivered_at = models.DateTimeField(blank=True, null=True)

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from services.models import Service, Product
+
 
 class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.DO_NOTHING, primary_key=True)
@@ -44,8 +46,8 @@ class Invoice(models.Model):
         (3, 'Expired'),
     ]
 
-    service = models.ForeignKey()
-    product = models.ForeignKey()
+    service = models.ForeignKey(Service, models.DO_NOTHING)
+    product = models.ForeignKey(Product, models.DO_NOTHING)
     itype = models.IntegerField(choices=TYPE_CHOICES, default=TYPE_CHOICES[0][0])
     status = models.IntegerField(choices=STATUS_CHOICES, default=STATUS_CHOICES[0][0])
     payment_handler = models.IntegerField(choices=PAYMENT_CHOICES, default=PAYMENT_CHOICES[0][0])
