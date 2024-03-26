@@ -11,6 +11,12 @@ class CloudProductsAPIView(ListCreateAPIView):
     queryset = serializer_class.Meta.model.objects.all()
 
 
+class CloudProductsGetAPIView(RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = ProductCloudSerializer
+    queryset = serializer_class.Meta.model.objects.all()
+
+
 class CloudsAPIView(ListAPIView):
     permission_classes = (IsAuthenticated, )
     serializer_class = CloudSerializer
