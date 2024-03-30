@@ -14,6 +14,7 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('my/', include('accounts.urls')),
+    path('clientarea/', include('clientarea.urls')),
     path('clouds/', include('clouds.urls')),
     path('services/', include('services.urls')),
 ]
