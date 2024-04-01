@@ -23,7 +23,7 @@ class AccountUserCreateStandardAPIView(APIView):
             # if 'mobile' in request.data:
             #     mobile = request.data['mobile']
             #     if self.model.objects.filter(mobile=mobile) or User.objects.filter(username=mobile):
-            #         return Response({'message': 'mobile is already exist. please change your mobile number.'}, status=HTTP_409_CONFLICT)
+            #         return Response({'error': 'mobile is already exist. please change your mobile number.'}, status=HTTP_409_CONFLICT)
             # if 'referral' in request.data:
             #     referral = request.data['refferal']
             #     if not User.objects.filter(username=referral):
