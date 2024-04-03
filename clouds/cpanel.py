@@ -1,8 +1,11 @@
+import requests
 
 
 class HZCloud:
     TOKEN = 'OIYKtUyFKQ9rY4LGq9CHdMRHaXhbRK5XcUnerncHkgZa3cJCmvnYC5S7I0bW8cBS'
     HEADERS = {'content-type': 'application/json', 'Authorization': f'Bearer {TOKEN}'}
+    DATACENTERS = []
+    IMAGES = []
 
     def __init__(self, token):
         if token:
@@ -11,20 +14,27 @@ class HZCloud:
     # Datacenters
     def get_all_datacenters(self):
         # https://docs.hetzner.cloud/#datacenters-get-all-datacenters
-        pass
+        response = requests.get('https://api.hetzner.cloud/v1/datacenters', headers=self.HEADERS).json()
+        self.DATACENTERS = response
+        return response
 
-    def get_a_datacenter(self):
+    def get_a_datacenter(self, datacenter_id):
         # https://docs.hetzner.cloud/#datacenters-get-a-datacenter
-        pass
+        response = requests.get(f'https://api.hetzner.cloud/v1/datacenters/{datacenter_id}',
+                                headers=self.HEADERS).json()
+        return response
 
     #
     # Images
     def get_all_images(self):
         # https://docs.hetzner.cloud/#images-get-all-images
-        pass
+        response = requests.get('https://api.hetzner.cloud/v1/images', headers=self.HEADERS).json()
+        self.IMAGES = response
+        return response
 
     def get_an_image(self):
         # https://docs.hetzner.cloud/#images-get-an-image
+        response = requests.get('', headers=self.HEADERS)
         pass
 
     #
