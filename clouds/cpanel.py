@@ -1,11 +1,15 @@
-import requests
+import requests, random, json, string
 
 
 class HZCloud:
     TOKEN = 'OIYKtUyFKQ9rY4LGq9CHdMRHaXhbRK5XcUnerncHkgZa3cJCmvnYC5S7I0bW8cBS'
     HEADERS = {'content-type': 'application/json', 'Authorization': f'Bearer {TOKEN}'}
+    
     DATACENTERS = []
+    LOCATIONS = []
     IMAGES = []
+    ISOS = []
+    PRIMARY_IPS = []
 
     def __init__(self, token):
         if token:
@@ -32,51 +36,97 @@ class HZCloud:
         self.IMAGES = response
         return response
 
-    def get_an_image(self):
+    def get_an_image(self, image_id):
         # https://docs.hetzner.cloud/#images-get-an-image
-        response = requests.get('', headers=self.HEADERS)
-        pass
+        response = requests.get(f'https://api.hetzner.cloud/v1/images/{image_id}', headers=self.HEADERS).json()
+        return response
 
     #
     # ISOs
     def get_all_isos(self):
         # https://docs.hetzner.cloud/#isos-get-all-isos
-        pass
+        response = requests.get('https://api.hetzner.cloud/v1/isos', headers=self.HEADERS).json()
+        self.ISOS = response
+        return response
 
-    def get_an_iso(self):
+    def get_an_iso(self, iso_id):
         # https://docs.hetzner.cloud/#isos-get-an-iso
-        pass
+        response = requests.get(f'https://api.hetzner.cloud/v1/isos/{iso_id}', headers=self.HEADERS).json()
+        return response
 
     #
     # Locations
     def get_all_locations(self):
         # https://docs.hetzner.cloud/#locations-get-all-locations
-        pass
+        response = requests.get('https://api.hetzner.cloud/v1/locations', headers=self.HEADERS).json()
+        self.LOCATIONS = response
+        return response
 
-    def get_a_location(self):
+    def get_a_location(self, location_id):
         # https://docs.hetzner.cloud/#locations-get-a-location
-        pass
+        response = requests.get(f'https://api.hetzner.cloud/v1/locations/{location_id}', 
+                                headers=self.HEADERS).json()
+        return response
     
     #
     # Ips
     def get_all_ips(self):
         # https://docs.hetzner.cloud/#primary-ips-get-all-primary-ips
-        pass
+        response = requests.get('https://api.hetzner.cloud/v1/primary_ips', headers=self.HEADERS).json()
+        self.PRIMARY_IPS = response
+        return response
 
-    def get_a_ip(self):
+    def get_a_ip(self, ip_id):
         # https://docs.hetzner.cloud/#primary-ips-get-a-primary-ip
-        pass
+        response = requests.get(f'https://api.hetzner.cloud/v1/primary_ips/{ip_id}', 
+                                headers=self.HEADERS).json()
+        return response
 
-    def create_a_ip(self):
+    def create_a_ip(self, assignee_id, datacenter, name, assignee_type='server', auto_delete=False, type=4):
+        """
+        assignee_id: ID of the resource the Primary IP should be assigned to. Omitted if it should not be assigned.
+        datacenter: ID or name of Datacenter the Primary IP will be bound to. Needs to be omitted if assignee_id is passed.
+        type: Allowed: ipv4, ipv6.
+        """
         # https://docs.hetzner.cloud/#primary-ips-create-a-primary-ip
-        pass
+        if not name:
+            name = f'ilda_{[random.choice(string.ascii_lowercase + string.digits) for _ in range(10)]}'
 
-    def delete_a_ip(self):
+        if type == 4:
+            type = 'ipv4'
+        elif type == 6:
+            type = 'ipb6'
+        else: return {'error': 'type must seleect between 4 or 6.'}
+
+        data = {
+            'assignee_type': assignee_type,
+            'auto_delete': auto_delete,
+            'name': name,
+            'type': type
+        }
+        if assignee_id: data['assignee_id'] = assignee_id
+        if datacenter and 'assignee_id' not in data: data['datacenter'] = datacenter
+            
+        response = requests.post('https://api.hetzner.cloud/v1/primary_ips', data=json.dump(data), 
+                                 headers=self.HEADERS).json()
+        return response
+
+    def delete_a_ip(self, ip_id):
         # https://docs.hetzner.cloud/#primary-ips-delete-a-primary-ip
-        pass
+        response = requests.delete(f'https://api.hetzner.cloud/v1/primary_ips/{ip_id}', headers=self.HEADERS)
+        return response
 
-    def assign_ip(self):
+    def assign_ip(self, ip_id):
+        """
+        ip_id: ID of the Primary IP.
+        assignee_id: ID of a resource of type assignee_type.
+        assignee_type: Allowed: server, Type of resource assigning the Primary IP to.
+        """
         # https://docs.hetzner.cloud/#primary-ip-actions-assign-a-primary-ip-to-a-resource
+        response = requests.post(f'https://api.hetzner.cloud/v1/primary_ips/{ip_id}/actions/assign')
+        data = {
+            
+        }
         pass
     
     def unassign_ip(self):
