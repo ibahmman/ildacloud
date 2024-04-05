@@ -138,11 +138,24 @@ class HZCloud:
                                  data=data, headers=self.HEADERS).json()
         return response
     
-    def unassign_ip(self, ip_id):
+    def unassign_ip(self, _type):
+        """
+        self.SERVER["public_net"]["ipv4"]["ip"]  ["dns_ptr"]
+        self.SERVER["public_net"]["ipv6"]["ip"]  ["dns_ptr"][{"dns_ptr": "", "ip":..}]
+        """
         # https://docs.hetzner.cloud/#primary-ip-actions-unassign-a-primary-ip-from-a-resource
-        response = requests.post(f'https://api.hetzner.cloud/v1/primary_ips/{ip_id}/actions/unassign',
-                                 headers=self.HEADERS).json()
-        return response
+        if self.SERVER:
+            if _type == 4:
+                ip_id = self.SERVER["public_net"]["ipv4"]["id"]
+            elif _type == 6:
+                ip_id = self.SERVER["public_net"]["ipv6"]["id"]
+            else:
+                return {'error': 'type must choices between 4 or 6.'}
+
+            response = requests.post(f'https://api.hetzner.cloud/v1/primary_ips/{ip_id}/actions/unassign',
+                                     headers=self.HEADERS).json()
+            return response
+        return {'error': 'use get_a_server for select server.'}
 
     #
     # Servers
@@ -287,13 +300,21 @@ class HZCloud:
             return response
         return {'error': 'use get_a_server for select server.'}
 
-    def change_ptr(self, ip, dns_ptr=''):
+    def change_ptr(self, _type=4, dns_ptr=''):
         """
         dns_ptr: Hostname to set as a reverse DNS PTR entry, reset to original value if null.
         ip: Primary IP address for which the reverse DNS entry should be set.
         """
         # https://docs.hetzner.cloud/#server-actions-change-reverse-dns-entry-for-this-server
+
         if self.SERVER:
+            if _type == 4:
+                ip = self.SERVER["public_net"]["ipv4"]["ip"]
+            # elif _type == 6:
+            #     ip = self.SERVER["public_net"]["ipv6"]["id"]
+            else:
+                return {'error': 'type must choices between 4.'}
+
             data = {
                 'dns_ptr': dns_ptr,
                 'ip': ip
