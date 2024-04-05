@@ -287,16 +287,18 @@ class HZCloud:
             return response
         return {'error': 'use get_a_server for select server.'}
 
-    def change_ptr(self, server_id, ip, dns_ptr=''):
+    def change_ptr(self, ip, dns_ptr=''):
         """
         dns_ptr: Hostname to set as a reverse DNS PTR entry, reset to original value if null.
         ip: Primary IP address for which the reverse DNS entry should be set.
         """
         # https://docs.hetzner.cloud/#server-actions-change-reverse-dns-entry-for-this-server
-        data = {
-            'dns_ptr': dns_ptr,
-            'ip': ip
-        }
-        response = requests.post(f'https://api.hetzner.cloud/v1/servers/{server_id}/actions/change_dns_ptr',
-                                 data=data, headers=self.HEADERS).json()
-        return response
+        if self.SERVER:
+            data = {
+                'dns_ptr': dns_ptr,
+                'ip': ip
+            }
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/change_dns_ptr',
+                                     data=data, headers=self.HEADERS).json()
+            return response
+        return {'error': 'use get_a_server for select server.'}
