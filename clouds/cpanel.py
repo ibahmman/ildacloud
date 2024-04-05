@@ -4,16 +4,22 @@ import requests, random, json, string
 class HZCloud:
     TOKEN = 'OIYKtUyFKQ9rY4LGq9CHdMRHaXhbRK5XcUnerncHkgZa3cJCmvnYC5S7I0bW8cBS'
     HEADERS = {'content-type': 'application/json', 'Authorization': f'Bearer {TOKEN}'}
-    
+    # ----------------------------------------------------------------------------------.
+    SERVER = None
+    # ----------------------------------------------------------------------------------.
     DATACENTERS = []
     LOCATIONS = []
     IMAGES = []
     ISOS = []
     PRIMARY_IPS = []
+    SERVERS = []
 
-    def __init__(self, token):
+    def __init__(self, token, server_id):
         if token:
             self.TOKEN = token
+
+        if server_id:
+            self.SERVER = self.get_a_server(server_id)
 
     # Datacenters
     def get_all_datacenters(self):
@@ -82,32 +88,33 @@ class HZCloud:
                                 headers=self.HEADERS).json()
         return response
 
-    def create_a_ip(self, assignee_id, datacenter, name, assignee_type='server', auto_delete=False, type=4):
+    def create_a_ip(self, assignee_id, datacenter, name, assignee_type='server', auto_delete=False, _type=4):
         """
         assignee_id: ID of the resource the Primary IP should be assigned to. Omitted if it should not be assigned.
         datacenter: ID or name of Datacenter the Primary IP will be bound to. Needs to be omitted if assignee_id is passed.
-        type: Allowed: ipv4, ipv6.
+        _type: Allowed: ipv4, ipv6.
         """
         # https://docs.hetzner.cloud/#primary-ips-create-a-primary-ip
         if not name:
             name = f'ilda_{[random.choice(string.ascii_lowercase + string.digits) for _ in range(10)]}'
 
-        if type == 4:
-            type = 'ipv4'
-        elif type == 6:
-            type = 'ipb6'
-        else: return {'error': 'type must seleect between 4 or 6.'}
+        if _type == 4:
+            _type = 'ipv4'
+        elif _type == 6:
+            _type = 'ipb6'
+        else:
+            return {'error': 'type must choices between 4 or 6.'}
 
         data = {
             'assignee_type': assignee_type,
             'auto_delete': auto_delete,
             'name': name,
-            'type': type
+            'type': _type
         }
         if assignee_id: data['assignee_id'] = assignee_id
         if datacenter and 'assignee_id' not in data: data['datacenter'] = datacenter
             
-        response = requests.post('https://api.hetzner.cloud/v1/primary_ips', data=json.dump(data), 
+        response = requests.post('https://api.hetzner.cloud/v1/primary_ips', data=data,
                                  headers=self.HEADERS).json()
         return response
 
@@ -116,76 +123,180 @@ class HZCloud:
         response = requests.delete(f'https://api.hetzner.cloud/v1/primary_ips/{ip_id}', headers=self.HEADERS)
         return response
 
-    def assign_ip(self, ip_id):
+    def assign_ip(self, ip_id, assignee_id, assignee_type='server'):
         """
         ip_id: ID of the Primary IP.
         assignee_id: ID of a resource of type assignee_type.
         assignee_type: Allowed: server, Type of resource assigning the Primary IP to.
         """
         # https://docs.hetzner.cloud/#primary-ip-actions-assign-a-primary-ip-to-a-resource
-        response = requests.post(f'https://api.hetzner.cloud/v1/primary_ips/{ip_id}/actions/assign')
         data = {
-            
+            'assignee_id': assignee_id,
+            'assignee_type': assignee_type
         }
-        pass
+        response = requests.post(f'https://api.hetzner.cloud/v1/primary_ips/{ip_id}/actions/assign',
+                                 data=data, headers=self.HEADERS).json()
+        return response
     
-    def unassign_ip(self):
+    def unassign_ip(self, ip_id):
         # https://docs.hetzner.cloud/#primary-ip-actions-unassign-a-primary-ip-from-a-resource
-        pass
-    
-    def change_ptr(self):
-        # https://docs.hetzner.cloud/#server-actions-change-reverse-dns-entry-for-this-server
-        pass
+        response = requests.post(f'https://api.hetzner.cloud/v1/primary_ips/{ip_id}/actions/unassign',
+                                 headers=self.HEADERS).json()
+        return response
 
     #
     # Servers
     def get_all_servers(self):
         # https://docs.hetzner.cloud/#servers-get-all-servers
-        pass
+        response = requests.get('https://api.hetzner.cloud/v1/servers',
+                                headers=self.HEADERS).json()
+        self.SERVERS = response
+        return response
 
-    def get_a_server(self):
+    def get_a_server(self, server_id):
         # https://docs.hetzner.cloud/#servers-get-a-server
-        pass
+        response = requests.get(f'https://api.hetzner.cloud/v1/servers/{server_id}',
+                                headers=self.HEADERS).json()
+        self.SERVER = response
+        return response
     
-    def create_a_server(self):
+    def create_a_server(self, datacenter, image, location, name, server_type):
+        """
+        datacenter: ID or name of Datacenter to create Server in (must not be used together with location).
+        image: ID or name of the Image the Server is created from.
+        location: ID or name of Location to create Server in (must not be used together with datacenter).
+        name: Name of the Server to create (must be unique per Project and a valid hostname as per RFC 1123).
+        server_type: ID or name of the Server type this Server should be created with.
+
+        Response:
+        action
+        next_action
+        root_password
+        server
+        """
         # https://docs.hetzner.cloud/#servers-create-a-server
-        pass
+        data = {
+            'image': image,
+            'name': name,
+            'server_type': server_type
+        }
+        if datacenter: data['datacenter'] = datacenter
+        if location: data['location'] = location
+        response = requests.post('https://api.hetzner.cloud/v1/servers', data=data,
+                                 headers=self.HEADERS).json()
+        return response
 
     def delete_a_server(self):
         # https://docs.hetzner.cloud/#servers-delete-a-server
-        pass
+        if self.SERVER:
+            response = requests.delete(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}').json()
+            return response
+        return {'error': 'use get_a_server for select server.'}
 
     #
     # Server Actions
     def shutdown_server(self):
+        """
+        id: ID of the Server.
+        """
         # https://docs.hetzner.cloud/#server-actions-shutdown-a-server
-        pass
+        if self.SERVER:
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/shutdown',
+                                     headers=self.HEADERS).json()
+            return response
+        return {'error': 'use get_a_server for select server.'}
 
     def power_off_server(self):
+        """
+        id: ID of the Server.
+        """
         # https://docs.hetzner.cloud/#server-actions-power-off-a-server
-        pass
-    
+        if self.SERVER:
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/poweroff',
+                                     headers=self.HEADERS).json()
+            return response
+        return {'error': 'use get_a_server for select server.'}
+
     def power_on_server(self):
+        """
+        id: ID of the Server.
+        """
         # https://docs.hetzner.cloud/#server-actions-power-on-a-server
-        pass
+        if self.SERVER:
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/poweron',
+                                     headers=self.HEADERS).json()
+            return response
+        return {'error': 'use get_a_server for select server.'}
     
     def soft_reboot_server(self):
+        """
+        id: ID of the Server.
+        """
         # https://docs.hetzner.cloud/#server-actions-soft-reboot-a-server
-        pass
+        if self.SERVER:
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/reboot',
+                                     headers=self.HEADERS).json()
+            return response
+        return {'error': 'use get_a_server for select server.'}
 
     def hard_restart_server(self):
+        """
+        id: ID of the Server.
+        """
         # https://docs.hetzner.cloud/#server-actions-reset-a-server
-        pass
+        if self.SERVER:
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/reset',
+                                     headers=self.HEADERS).json()
+            return response
+        return {'error': 'use get_a_server for select server.'}
 
-    def rebuild_server(self):
+    def rebuild_server(self, image):
+        """
+        id: ID of the Server.
+        image: ID or name of Image to rebuilt from.
+        """
         # https://docs.hetzner.cloud/#server-actions-rebuild-a-server-from-an-image
-        pass
+        if self.SERVER:
+            data = {
+                'image': image,
+            }
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/poweroff',
+                                     data=data, headers=self.HEADERS).json()
+            return response
+        return {'error': 'use get_a_server for select server.'}
 
     def reset_passwd_server(self):
+        """
+        id: ID of the Server.
+        """
         # https://docs.hetzner.cloud/#server-actions-reset-root-password-of-a-server
-        pass
+        if self.SERVER:
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/poweroff',
+                                     headers=self.HEADERS).json()
+            return response
+        return {'error': 'use get_a_server for select server.'}
 
     def request_console_server(self):
+        """
+        id: ID of the Server.
+        """
         # https://docs.hetzner.cloud/#server-actions-request-console-for-a-server
-        pass
+        if self.SERVER:
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/poweroff',
+                                     headers=self.HEADERS).json()
+            return response
+        return {'error': 'use get_a_server for select server.'}
 
+    def change_ptr(self, server_id, ip, dns_ptr=''):
+        """
+        dns_ptr: Hostname to set as a reverse DNS PTR entry, reset to original value if null.
+        ip: Primary IP address for which the reverse DNS entry should be set.
+        """
+        # https://docs.hetzner.cloud/#server-actions-change-reverse-dns-entry-for-this-server
+        data = {
+            'dns_ptr': dns_ptr,
+            'ip': ip
+        }
+        response = requests.post(f'https://api.hetzner.cloud/v1/servers/{server_id}/actions/change_dns_ptr',
+                                 data=data, headers=self.HEADERS).json()
+        return response
