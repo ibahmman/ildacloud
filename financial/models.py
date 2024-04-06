@@ -19,14 +19,14 @@ class Wallet(models.Model):
             if self.usdt < amount:
                 return False
             return True
-        return 'amount must be float.'
+        return False
 
     def reduce_balance(self, amount):
         if isinstance(amount, float):
             self.usdt -= amount
             self.save()
-            return True, f'your balance is {self.usdt}'
-        return False, 'amount must be float.'
+            return True
+        return False
 
 
 class Exchange_USDT(models.Model):

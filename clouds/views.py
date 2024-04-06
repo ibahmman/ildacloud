@@ -2,7 +2,8 @@ from django.shortcuts import render, get_object_or_404, get_list_or_404
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView
 from rest_framework.views import APIView
-from rest_framework.status import HTTP_100_CONTINUE, HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN
+from rest_framework.status import (HTTP_100_CONTINUE, HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST,
+                                   HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN, HTTP_500_INTERNAL_SERVER_ERROR)
 from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS, IsAdminUser
 from .serializers import CloudSerializer, ProductCloudSerializer
 from services.models import Service, PCloud, Product
@@ -52,21 +53,26 @@ class CloudsAPIView(ListCreateAPIView):
             try:
                 can_create = (
                         (self.request.data['period'] == 'hourly' and self.request.user.wallet.having_enough_usdt(
-                            self.model.product_cloud.price_amount / 30 / 24)) or
+                            product_cloud.price_amount / 30 / 24)) or
                         (self.request.data['period'] == 'daily' and self.request.user.wallet.having_enough_usdt(
-                            self.model.product_cloud.price_amount / 30)) or
+                            product_cloud.price_amount / 30)) or
                         (self.request.data['period'] == 'monthly' and self.request.user.wallet.having_enough_usdt(
-                            self.model.product_cloud.price_amount))
+                            product_cloud.price_amount))
                 )
                 assert can_create, 'your balance is insufficient.'
                 new_cloud = self.model(user=self.request.user, product_main=product_main,
-                                       period=self.request.data['period'], )
+                                       period=self.request.data['period'], product_cloud=product_cloud)
+                new_cloud.save()
+                new_cloud.last_pay()
+            except AssertionError as e:
+                return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
             except:
-                pass
-            else:
-                if can_create:
-                    if self.model.product_cloud.datacenter.tag == 'HZ':
-                        new_cloud = HZCloud.create_a_server()
+                return Response({'error': 'can not create cloud.'}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # else:
+            #     if can_create:
+            #         if self.model.product_cloud.datacenter.tag == 'HZ':
+            #             new_cloud = HZCloud.create_a_server()
 
         return Response({'hello': 'world.'})
 
