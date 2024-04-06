@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.timezone import now
 
 
 class Datacenter(models.Model):
@@ -49,7 +50,7 @@ class Service(models.Model):
     PERIOD_CHOICES = [
         ('hourly', 'ساعتی'),
         ('daily', 'روزانه'),
-        ('mounthly', 'ماهیانه'),
+        ('monthly', 'ماهیانه'),
     ]
 
     user = models.ForeignKey(User, models.DO_NOTHING)
@@ -64,6 +65,19 @@ class Service(models.Model):
 
     def __str__(self) -> str:
         return f'{self.product_main} (user: {self.user}) status: {self.status}'
+
+    def save(self, *args, **kwargs):
+        obj = super(Service, self).save(*args, **kwargs)
+        if obj.user.wallet.reduce_balance(obj.product_main.price_amount)[0]:
+            self.last_pay()
+
+    def last_pay(self):
+        self.lastpay_at = now()
+        self.save()
+
+    def deliver(self):
+        self.delivered_at = now()
+        self.save()
 
 
 class SCloud(Service):

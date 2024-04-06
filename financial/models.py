@@ -14,6 +14,20 @@ class Wallet(models.Model):
     def __str__(self) -> str:
         return f'{self.user} (usdt:{self.usdt}) (earning:{self.earning})'
 
+    def having_enough_usdt(self, amount):
+        if isinstance(amount, float):
+            if self.usdt < amount:
+                return False
+            return True
+        return 'amount must be float.'
+
+    def reduce_balance(self, amount):
+        if isinstance(amount, float):
+            self.usdt -= amount
+            self.save()
+            return True, f'your balance is {self.usdt}'
+        return False, 'amount must be float.'
+
 
 class Exchange_USDT(models.Model):
     FINANCIAL_UNIT_CHOICES = [
