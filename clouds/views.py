@@ -42,6 +42,9 @@ class CloudsAPIView(ListCreateAPIView):
         try:
             assert 'product_cloud' in request.data, 'product_cloud is required.'
             assert 'period' in request.data, 'period is required.'
+            assert 'image' in request.data, 'image (os name or id) is required.'
+            assert 'server_type' in request.data, 'server_type is required.'
+
             product_cloud = get_object_or_404(PCloud, id=request.data['product_cloud'])
             product_main = get_object_or_404(Product, id=product_cloud.id)
         except AssertionError as e:
@@ -69,13 +72,21 @@ class CloudsAPIView(ListCreateAPIView):
             except:
                 return Response({'error': 'can not create cloud.'}, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
-            # else:
-            #     if can_create:
-            #         if self.model.product_cloud.datacenter.tag == 'HZ':
-            #             new_cloud = HZCloud.create_a_server()
+            else:
+                if can_create:
+                    data = {
+                        'image': request.data['image'],
+                        'server_type': request.data['server_type'],
+                        'name': f'ilda{new_cloud.id}'
+                    }
+
+                    if 'datacenter' in request.data: data['datacenter'] = request.data['datacenter']
+                    if 'location' in request.data: data['location'] = request.data['location']
+
+                    response = new_cloud.deliver(**data)
+                    return Response(response)
 
         return Response({'hello': 'world.'})
-
 
 
 class CloudGetAPIView(RetrieveUpdateDestroyAPIView):

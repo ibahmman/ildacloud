@@ -67,18 +67,20 @@ class Service(models.Model):
     def __str__(self) -> str:
         return f'{self.product_main} (user: {self.user}) status: {self.status}'
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
     def last_pay(self):
         amount = self.product_main.price_amount
         if self.period == 'hourly': amount = self.product_main.price_amount / 30 / 24
         elif self.period == 'daily': amount = self.product_main.price_amount / 30
         elif self.period == 'monthly': amount = self.product_main.price_amount
-
         if self.user.wallet.reduce_balance(amount):
             self.lastpay_at = now()
             self.save()
 
-            if not self.delivered_at:
-                self.deliver()
+            # if not self.delivered_at:
+            #     self.deliver()
 
     def deliver(self, *args, **kwargs):
         self.delivered_at = now()
@@ -87,9 +89,6 @@ class Service(models.Model):
 
 class SCloud(Service):
     product_cloud = models.ForeignKey(PCloud, models.DO_NOTHING)
-    order_os = models.TextField()
-    order_dc = models.TextField()
-    order_lo = models.TextField()
     cloud_id = models.TextField(blank=True, null=True)
     cloud_ipv4 = models.TextField(max_length=15, blank=True, null=True)
     cloud_ipv6 = models.TextField(max_length=39, blank=True, null=True)
@@ -97,10 +96,15 @@ class SCloud(Service):
 
     def deliver(self, *args, **kwargs):
         if self.product_cloud.datacenter.tag == 'HZ':
-            cloud = HZCloud.create_a_server(**kwargs)
-            pass
-
-        super().deliver()
+            try:
+                cloud = HZCloud()
+                cloud = cloud.create_a_server(**kwargs)
+                assert 'id' in cloud['server'], 'server do not to create in datacenter.'
+                self.cloud_id = cloud['server']['id']
+                self.root_password = cloud['root_password']
+                return cloud
+            except AssertionError as e:
+                return {'error': str(e)}
 
 
 class ActionLogs(models.Model):

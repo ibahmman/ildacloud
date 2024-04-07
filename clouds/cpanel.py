@@ -14,7 +14,7 @@ class HZCloud:
     PRIMARY_IPS = []
     SERVERS = []
 
-    def __init__(self, token, server_id):
+    def __init__(self, token=None, server_id=None):
         if token:
             self.TOKEN = token
 
@@ -173,8 +173,9 @@ class HZCloud:
         self.SERVER = response
         return response
     
-    def create_a_server(self, datacenter, image, location, name, server_type):
+    def create_a_server(self, **kwargs):
         """
+        datacenter, image, location, name, server_type,
         datacenter: ID or name of Datacenter to create Server in (must not be used together with location).
         image: ID or name of the Image the Server is created from.
         location: ID or name of Location to create Server in (must not be used together with datacenter).
@@ -188,14 +189,14 @@ class HZCloud:
         server
         """
         # https://docs.hetzner.cloud/#servers-create-a-server
-        data = {
-            'image': image,
-            'name': name,
-            'server_type': server_type
-        }
-        if datacenter: data['datacenter'] = datacenter
-        if location: data['location'] = location
-        response = requests.post('https://api.hetzner.cloud/v1/servers', data=data,
+        # data = {
+        #     'image': image,
+        #     'name': name,
+        #     'server_type': server_type
+        # }
+        # if datacenter: data['datacenter'] = datacenter
+        # if location: data['location'] = location
+        response = requests.post('https://api.hetzner.cloud/v1/servers', data=json.dumps(kwargs),
                                  headers=self.HEADERS).json()
         return response
 
