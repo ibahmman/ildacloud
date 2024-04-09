@@ -66,7 +66,7 @@ class CloudsAPIView(ListCreateAPIView):
                 new_cloud = self.model(user=self.request.user, product_main=product_main,
                                        period=self.request.data['period'], product_cloud=product_cloud)
                 new_cloud.save()
-                new_cloud.last_pay()
+                new_cloud.last_pay_update()
             except AssertionError as e:
                 return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
             except:
@@ -97,6 +97,14 @@ class CloudGetAPIView(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return self.model.objects.filter(user=self.request.user)
 
+    def update(self, request, *args, **kwargs):
+        print('update')
+        return super().update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        print('delete')
+        return super().delete(request, *args, **kwargs)
+
 
 class CloudActionAPIView(APIView):
     """
@@ -113,7 +121,7 @@ class CloudActionAPIView(APIView):
     # model_service = Service
 
     ACTIONS = ['stop', 'shutdown', 'start', 'reboot', 'restart', 'rebuild', 'passwd',
-               'ipv4', 'ipv6', 'ptr4', 'console', 'create', 'delete', 'update']
+               'ipv4', 'ipv6', 'ptr4', 'console']   # , 'create', 'delete', 'update'
     OS_LIST = ['w12', 'w19', 'w22', 'u18', 'u20', 'u22', 'd11', 'd10', 'c09', 'c08']
 
     def post(self, request):

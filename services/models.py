@@ -1,3 +1,4 @@
+from typing import Any
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
@@ -8,10 +9,16 @@ class Datacenter(models.Model):
     name = models.CharField(max_length=26, unique=True)
     tag = models.CharField(max_length=2, unique=True)
 
+    def __str__(self) -> str:
+        return f'{self.name}  {self.tag}'
+
 
 class Location(models.Model):
     name = models.CharField(max_length=26, unique=True)
     tag = models.CharField(max_length=2, unique=True)
+
+    def __str__(self) -> str:
+        return f'{self.name}  {self.tag}'
 
 
 class Product(models.Model):
@@ -70,7 +77,13 @@ class Service(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-    def last_pay(self):
+    def delete(self, using: Any = ..., keep_parents: bool = ...) -> tuple[int, dict[str, int]]:
+        return super().delete(using, keep_parents)
+    
+    def upgrade(self, product):
+        pass
+
+    def last_pay_update(self):
         amount = self.product_main.price_amount
         if self.period == 'hourly': amount = self.product_main.price_amount / 30 / 24
         elif self.period == 'daily': amount = self.product_main.price_amount / 30
