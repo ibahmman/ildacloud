@@ -203,7 +203,8 @@ class HZCloud:
     def delete_a_server(self):
         # https://docs.hetzner.cloud/#servers-delete-a-server
         if self.SERVER:
-            response = requests.delete(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}').json()
+            response = requests.delete(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["server"]["id"]}',
+                                       headers=self.HEADERS).json()
             return response
         return {'error': 'use get_a_server for select server.'}
 
@@ -215,7 +216,7 @@ class HZCloud:
         """
         # https://docs.hetzner.cloud/#server-actions-shutdown-a-server
         if self.SERVER:
-            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/shutdown',
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["server"]["id"]}/actions/shutdown',
                                      headers=self.HEADERS).json()
             return response
         return {'error': 'use get_a_server for select server.'}
@@ -226,7 +227,7 @@ class HZCloud:
         """
         # https://docs.hetzner.cloud/#server-actions-power-off-a-server
         if self.SERVER:
-            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/poweroff',
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["server"]["id"]}/actions/poweroff',
                                      headers=self.HEADERS).json()
             return response
         return {'error': 'use get_a_server for select server.'}
@@ -237,7 +238,7 @@ class HZCloud:
         """
         # https://docs.hetzner.cloud/#server-actions-power-on-a-server
         if self.SERVER:
-            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/poweron',
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["server"]["id"]}/actions/poweron',
                                      headers=self.HEADERS).json()
             return response
         return {'error': 'use get_a_server for select server.'}
@@ -248,7 +249,7 @@ class HZCloud:
         """
         # https://docs.hetzner.cloud/#server-actions-soft-reboot-a-server
         if self.SERVER:
-            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/reboot',
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["server"]["id"]}/actions/reboot',
                                      headers=self.HEADERS).json()
             return response
         return {'error': 'use get_a_server for select server.'}
@@ -259,7 +260,7 @@ class HZCloud:
         """
         # https://docs.hetzner.cloud/#server-actions-reset-a-server
         if self.SERVER:
-            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/reset',
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["server"]["id"]}/actions/reset',
                                      headers=self.HEADERS).json()
             return response
         return {'error': 'use get_a_server for select server.'}
@@ -274,7 +275,7 @@ class HZCloud:
             data = {
                 'image': image,
             }
-            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/poweroff',
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["server"]["id"]}/actions/poweroff',
                                      data=data, headers=self.HEADERS).json()
             return response
         return {'error': 'use get_a_server for select server.'}
@@ -285,7 +286,7 @@ class HZCloud:
         """
         # https://docs.hetzner.cloud/#server-actions-reset-root-password-of-a-server
         if self.SERVER:
-            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/poweroff',
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["server"]["id"]}/actions/poweroff',
                                      headers=self.HEADERS).json()
             return response
         return {'error': 'use get_a_server for select server.'}
@@ -296,7 +297,7 @@ class HZCloud:
         """
         # https://docs.hetzner.cloud/#server-actions-request-console-for-a-server
         if self.SERVER:
-            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/poweroff',
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["server"]["id"]}/actions/poweroff',
                                      headers=self.HEADERS).json()
             return response
         return {'error': 'use get_a_server for select server.'}
@@ -320,7 +321,7 @@ class HZCloud:
                 'dns_ptr': dns_ptr,
                 'ip': ip
             }
-            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["id"]}/actions/change_dns_ptr',
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["server"]["id"]}/actions/change_dns_ptr',
                                      data=data, headers=self.HEADERS).json()
             return response
         return {'error': 'use get_a_server for select server.'}

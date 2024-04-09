@@ -77,8 +77,8 @@ class Service(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
-    def delete(self, using: Any = ..., keep_parents: bool = ...) -> tuple[int, dict[str, int]]:
-        return super().delete(using, keep_parents)
+    def delete(self):
+        return super(Service, self).delete()
     
     def upgrade(self, product):
         pass
@@ -115,9 +115,25 @@ class SCloud(Service):
                 assert 'id' in cloud['server'], 'server do not to create in datacenter.'
                 self.cloud_id = cloud['server']['id']
                 self.root_password = cloud['root_password']
+                self.save()
                 return cloud
             except AssertionError as e:
                 return {'error': str(e)}
+            except:
+                return {'error': 'exception in create cloud and deliver.'}
+
+    def delete(self):
+        if self.product_cloud.datacenter.tag == 'HZ':
+            try:
+                cloud = HZCloud(server_id=self.cloud_id)
+                cloud = cloud.delete_a_server()
+                assert "id" in cloud["action"], 'can not to delete server.'
+                super(SCloud, self).delete()
+                return cloud
+            except AssertionError as e:
+                return {'error': str(e)}
+            except:
+                return {'error': 'exception in delete server.'}
 
 
 class ActionLogs(models.Model):

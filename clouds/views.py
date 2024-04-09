@@ -3,12 +3,14 @@ from rest_framework.response import Response
 from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView
 from rest_framework.views import APIView
 from rest_framework.status import (HTTP_100_CONTINUE, HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST,
-                                   HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN, HTTP_500_INTERNAL_SERVER_ERROR)
+                                   HTTP_404_NOT_FOUND, HTTP_403_FORBIDDEN, HTTP_500_INTERNAL_SERVER_ERROR,
+                                   HTTP_204_NO_CONTENT)
 from rest_framework.permissions import AllowAny, IsAuthenticated, SAFE_METHODS, IsAdminUser
 from .serializers import CloudSerializer, ProductCloudSerializer
 from services.models import Service, PCloud, Product
 from .cpanel import HZCloud
 from time import sleep
+import json
 
 
 class CloudProductsAPIView(ListCreateAPIView):
@@ -102,8 +104,8 @@ class CloudGetAPIView(RetrieveUpdateDestroyAPIView):
         return super().update(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
-        print('delete')
-        return super().delete(request, *args, **kwargs)
+        super().delete(request, *args, **kwargs)
+        return Response({'message': 'server deleted.'}, status=HTTP_204_NO_CONTENT)
 
 
 class CloudActionAPIView(APIView):
