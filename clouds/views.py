@@ -100,12 +100,26 @@ class CloudGetAPIView(RetrieveUpdateDestroyAPIView):
         return self.model.objects.filter(user=self.request.user)
 
     def update(self, request, *args, **kwargs):
-        print('update')
+        try:
+            if "product_name" in request.data:
+                cloud = self.get_object()
+                if cloud.change_type(request.data['product_name']):
+                    return Response(self.get_serializer(instance=self.get_object()).data, status=HTTP_200_OK)
+                else:
+                    return Response({'product not found, check product_name.'}, status=HTTP_404_NOT_FOUND)
+
+        except AssertionError as e:
+            return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
+        except:
+            return Response({'error': 'can not update cloud.'}, status=HTTP_500_INTERNAL_SERVER_ERROR)
         return super().update(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
-        super().delete(request, *args, **kwargs)
-        return Response({'message': 'server deleted.'}, status=HTTP_204_NO_CONTENT)
+        try:
+            super().delete(request, *args, **kwargs)
+            return Response({'message': 'server deleted.'}, status=HTTP_204_NO_CONTENT)
+        except:
+            return Response({'error': 'can not delete cloud.'}, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CloudActionAPIView(APIView):

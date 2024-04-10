@@ -80,8 +80,15 @@ class Service(models.Model):
     def delete(self):
         return super(Service, self).delete()
     
-    def upgrade(self, product):
-        pass
+    def change_type(self, product):
+        try:
+            product = Product.objects.get(name=product)
+            self.product_main = product
+            self.save()
+        except:
+            return False
+        else:
+            return True
 
     def last_pay_update(self):
         amount = self.product_main.price_amount
@@ -134,6 +141,19 @@ class SCloud(Service):
                 return {'error': str(e)}
             except:
                 return {'error': 'exception in delete server.'}
+
+    def change_type(self, product):
+        if super().change_type(product):
+            try:
+                product_cloud = PCloud.objects.get(name=product)
+                self.product_cloud = product_cloud
+                self.save()
+            except:
+                return False
+            else:
+                cloud = HZCloud(server_id=self.cloud_id)
+                cloud.
+                return True
 
 
 class ActionLogs(models.Model):
