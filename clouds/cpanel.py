@@ -10,6 +10,7 @@ class HZCloud:
     DATACENTERS = []
     LOCATIONS = []
     IMAGES = []
+    SERVER_TYPES = []
     ISOS = []
     PRIMARY_IPS = []
     SERVERS = []
@@ -45,6 +46,19 @@ class HZCloud:
     def get_an_image(self, image_id):
         # https://docs.hetzner.cloud/#images-get-an-image
         response = requests.get(f'https://api.hetzner.cloud/v1/images/{image_id}', headers=self.HEADERS).json()
+        return response
+
+    #
+    # Server Types
+    def get_all_server_types(self):
+        # https://docs.hetzner.cloud/#server-types-get-all-server-types
+        response = requests.get('https://api.hetzner.cloud/v1/server_types', headers=self.HEADERS).json()
+        self.SERVER_TYPES = response
+        return response
+
+    def get_a_server_type(self, server_type):
+        # https://docs.hetzner.cloud/#server-types-get-a-server-type
+        response = requests.get(f'https://api.hetzner.cloud/v1/server_types/{server_type}', headers=self.HEADERS).json()
         return response
 
     #
@@ -210,6 +224,22 @@ class HZCloud:
 
     #
     # Server Actions
+    def change_type_server(self, server_type, upgrade_disk=True):
+        """
+        server_type: ID or name of Server type the Server should migrate to.
+        upgrade_disk: If false, do not upgrade the disk (this allows downgrading the Server type later).
+        """
+        # https://docs.hetzner.cloud/#server-actions-change-the-type-of-a-server
+        if self.SERVER:
+            data = {
+                'server_type': server_type,
+                'upgrade_disk': upgrade_disk
+            }
+            response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["server"]["id"]}/actions/change_type',
+                                     data=data, headers=self.HEADERS).json()
+            return response
+        return {'error': 'use get_a_server for select server.'}
+
     def shutdown_server(self):
         """
         id: ID of the Server.

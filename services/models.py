@@ -152,7 +152,7 @@ class SCloud(Service):
                 return False
             else:
                 cloud = HZCloud(server_id=self.cloud_id)
-                cloud.
+                cloud.change_type_server(product_cloud.name)
                 return True
 
 
