@@ -164,37 +164,45 @@ class CloudActionAPIView(APIView):
                 case 0:
                     # stop
                     if cloud.product_cloud.datacenter.tag == 'HZ':
-                        pass
+                        hzcloud = HZCloud(server_id=cloud.cloud_id)
+                        hzcloud = hzcloud.power_off_server()
                     pass
                 case 1:
                     # shutdown
                     if cloud.product_cloud.datacenter.tag == 'HZ':
-                        pass
+                        hzcloud = HZCloud(server_id=cloud.cloud_id)
+                        hzcloud = hzcloud.shutdown_server()
                     pass
                 case 2:
                     # start
                     if cloud.product_cloud.datacenter.tag == 'HZ':
-                        pass
+                        hzcloud = HZCloud(server_id=cloud.cloud_id)
+                        hzcloud = hzcloud.power_on_server()
                     pass
                 case 3:
                     # reboot
                     if cloud.product_cloud.datacenter.tag == 'HZ':
-                        pass
+                        hzcloud = HZCloud(server_id=cloud.cloud_id)
+                        hzcloud = hzcloud.hard_restart_server()
                     pass
                 case 4:
                     # restart
                     if cloud.product_cloud.datacenter.tag == 'HZ':
-                        pass
+                        hzcloud = HZCloud(server_id=cloud.cloud_id)
+                        hzcloud = hzcloud.soft_reboot_server()
                     pass
                 case 5:
                     # rebuild
                     if cloud.product_cloud.datacenter.tag == 'HZ':
-                        pass
+                        hzcloud = HZCloud(server_id=cloud.cloud_id)
+                        hzcloud = hzcloud.rebuild_server(more)
                     pass
                 case 6:
                     # passwd
                     if cloud.product_cloud.datacenter.tag == 'HZ':
-                        pass
+                        hzcloud = HZCloud(server_id=cloud.cloud_id)
+                        hzcloud = hzcloud.reset_passwd_server()
+                        # need for set to model (cloud) and save.
                     pass
                 case 7:
                     # ipv4
@@ -209,12 +217,14 @@ class CloudActionAPIView(APIView):
                 case 9:
                     # ptr4
                     if cloud.product_cloud.datacenter.tag == 'HZ':
-                        pass
+                        hzcloud = HZCloud(server_id=cloud.cloud_id)
+                        hzcloud = hzcloud.change_ptr(dns_ptr=more)
                     pass
                 case 10:
                     # console
                     if cloud.product_cloud.datacenter.tag == 'HZ':
-                        pass
+                        hzcloud = HZCloud(server_id=cloud.cloud_id)
+                        hzcloud = hzcloud.request_console_server()
                     pass
                 # case 11:
                 #     # create
