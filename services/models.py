@@ -143,16 +143,16 @@ class SCloud(Service):
                 return {'error': 'exception in delete server.'}
 
     def change_type(self, product):
-        if super().change_type(product):
+        if super().change_type(product.upper()):
             try:
-                product_cloud = PCloud.objects.get(name=product)
+                product_cloud = PCloud.objects.get(name=product.upper())
                 self.product_cloud = product_cloud
                 self.save()
             except:
                 return False
             else:
                 cloud = HZCloud(server_id=self.cloud_id)
-                cloud.change_type_server(product_cloud.name)
+                cloud.change_type_server(product_cloud.name.lower())
                 return True
 
 

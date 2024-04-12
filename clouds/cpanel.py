@@ -236,7 +236,7 @@ class HZCloud:
                 'upgrade_disk': upgrade_disk
             }
             response = requests.post(f'https://api.hetzner.cloud/v1/servers/{self.SERVER["server"]["id"]}/actions/change_type',
-                                     data=data, headers=self.HEADERS).json()
+                                     data=json.dumps(data), headers=self.HEADERS).json()
             return response
         return {'error': 'use get_a_server for select server.'}
 
