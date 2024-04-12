@@ -152,8 +152,60 @@ class SCloud(Service):
                 return False
             else:
                 cloud = HZCloud(server_id=self.cloud_id)
-                cloud.change_type_server(product_cloud.name.lower())
-                return True
+                response = cloud.change_type_server(product_cloud.name.lower())
+                print(response)
+                return response
+                # return True
+
+    def hetzner_actions(self, action, more=None):
+        response = {'error': ':)'}
+        match action:
+            case 0:
+                # stop
+                hzcloud = HZCloud(server_id=self.cloud_id)
+                response = hzcloud.power_off_server()
+            case 1:
+                # shutdown
+                hzcloud = HZCloud(server_id=self.cloud_id)
+                response = hzcloud.shutdown_server()
+            case 2:
+                # start
+                hzcloud = HZCloud(server_id=self.cloud_id)
+                response = hzcloud.power_on_server()
+            case 3:
+                # reboot
+                hzcloud = HZCloud(server_id=self.cloud_id)
+                response = hzcloud.hard_restart_server()
+            case 4:
+                # restart
+                hzcloud = HZCloud(server_id=self.cloud_id)
+                response = hzcloud.soft_reboot_server()
+            case 5:
+                # rebuild
+                hzcloud = HZCloud(server_id=self.cloud_id)
+                response = hzcloud.rebuild_server(more)
+            case 6:
+                # passwd
+                hzcloud = HZCloud(server_id=self.cloud_id)
+                response = hzcloud.reset_passwd_server()
+                # need for set to model (cloud) and save.
+                self.root_password = response['root_password']
+                self.save()
+            case 7:
+                # ipv4
+                pass
+            case 8:
+                # ipv6
+                pass
+            case 9:
+                # ptr4
+                hzcloud = HZCloud(server_id=self.cloud_id)
+                response = hzcloud.change_ptr(dns_ptr=more)
+            case 10:
+                # console
+                hzcloud = HZCloud(server_id=self.cloud_id)
+                response = hzcloud.request_console_server()
+        return response
 
 
 class ActionLogs(models.Model):

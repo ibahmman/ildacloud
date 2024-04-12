@@ -86,7 +86,7 @@ class CloudsAPIView(ListCreateAPIView):
                     if 'location' in request.data: data['location'] = request.data['location']
 
                     response = new_cloud.deliver(**data)
-                    return Response(response)
+                    return Response(response, status=HTTP_201_CREATED)
 
         return Response({'hello': 'world.'})
 
@@ -103,8 +103,13 @@ class CloudGetAPIView(RetrieveUpdateDestroyAPIView):
         try:
             if "product_name" in request.data:
                 cloud = self.get_object()
-                if cloud.change_type(request.data['product_name']):
-                    return Response(self.get_serializer(instance=self.get_object()).data, status=HTTP_200_OK)
+                response = cloud.change_type(request.data['product_name'])
+                if response is not False:
+                    if 'error' in response:
+                        return Response(response, status=HTTP_400_BAD_REQUEST)
+                    return Response({
+                        'cloud': self.get_serializer(instance=self.get_object()).data
+                    }, status=HTTP_200_OK)
                 else:
                     return Response({'product not found, check product_name.'}, status=HTTP_404_NOT_FOUND)
 
@@ -140,15 +145,19 @@ class CloudActionAPIView(APIView):
                'ipv4', 'ipv6', 'ptr4', 'console']   # , 'create', 'delete', 'update'
     OS_LIST = ['w12', 'w19', 'w22', 'u18', 'u20', 'u22', 'd11', 'd10', 'c09', 'c08']
 
+    def get_object(self, cloud_id):
+        return self.model.objects.get(id=cloud_id)
+
     def post(self, request):
         cloudservice_id = request.data['cloud']
         action = request.data['action']
         more = str(request.data['more']).lower() if 'more' in request.data else 'ildacloud.chelseru.com'
 
         try:
-            cloud = self.model.objects.get(id=cloudservice_id)
+            cloud = self.get_object(cloudservice_id)
             # service = self.model_service.objects.get(id=cloud.id)
-            assert isinstance(action, int), 'action should be int.'
+            assert isinstance(int(action), int), 'action should be int.'
+            action = int(action)
             assert action in range(14), 'invalid action. between 0-13'
             if action == 5:
                 # rebuild
@@ -160,96 +169,13 @@ class CloudActionAPIView(APIView):
             return Response({'error': 'cloud service not found.'}, status=HTTP_404_NOT_FOUND)
 
         else:
-            match action:
-                case 0:
-                    # stop
-                    if cloud.product_cloud.datacenter.tag == 'HZ':
-                        hzcloud = HZCloud(server_id=cloud.cloud_id)
-                        hzcloud = hzcloud.power_off_server()
-                    pass
-                case 1:
-                    # shutdown
-                    if cloud.product_cloud.datacenter.tag == 'HZ':
-                        hzcloud = HZCloud(server_id=cloud.cloud_id)
-                        hzcloud = hzcloud.shutdown_server()
-                    pass
-                case 2:
-                    # start
-                    if cloud.product_cloud.datacenter.tag == 'HZ':
-                        hzcloud = HZCloud(server_id=cloud.cloud_id)
-                        hzcloud = hzcloud.power_on_server()
-                    pass
-                case 3:
-                    # reboot
-                    if cloud.product_cloud.datacenter.tag == 'HZ':
-                        hzcloud = HZCloud(server_id=cloud.cloud_id)
-                        hzcloud = hzcloud.hard_restart_server()
-                    pass
-                case 4:
-                    # restart
-                    if cloud.product_cloud.datacenter.tag == 'HZ':
-                        hzcloud = HZCloud(server_id=cloud.cloud_id)
-                        hzcloud = hzcloud.soft_reboot_server()
-                    pass
-                case 5:
-                    # rebuild
-                    if cloud.product_cloud.datacenter.tag == 'HZ':
-                        hzcloud = HZCloud(server_id=cloud.cloud_id)
-                        hzcloud = hzcloud.rebuild_server(more)
-                    pass
-                case 6:
-                    # passwd
-                    if cloud.product_cloud.datacenter.tag == 'HZ':
-                        hzcloud = HZCloud(server_id=cloud.cloud_id)
-                        hzcloud = hzcloud.reset_passwd_server()
-                        # need for set to model (cloud) and save.
-                    pass
-                case 7:
-                    # ipv4
-                    if cloud.product_cloud.datacenter.tag == 'HZ':
-                        pass
-                    pass
-                case 8:
-                    # ipv6
-                    if cloud.product_cloud.datacenter.tag == 'HZ':
-                        pass
-                    pass
-                case 9:
-                    # ptr4
-                    if cloud.product_cloud.datacenter.tag == 'HZ':
-                        hzcloud = HZCloud(server_id=cloud.cloud_id)
-                        hzcloud = hzcloud.change_ptr(dns_ptr=more)
-                    pass
-                case 10:
-                    # console
-                    if cloud.product_cloud.datacenter.tag == 'HZ':
-                        hzcloud = HZCloud(server_id=cloud.cloud_id)
-                        hzcloud = hzcloud.request_console_server()
-                    pass
-                # case 11:
-                #     # create
-                #     # check wallet if have more than 7 days create.
-                #     if self.model.period == 'hourly' and self.request.user.wallet.having_enough_usdt(
-                #             self.model.product_cloud.price_amount/30/24):
-                #         if cloud.product_cloud.datacenter.tag == 'HZ':
-                #             hzcloud = HZCloud.create_a_server()
-                #             pass
-                #         pass
-                #
-                #
-                #     pass
-                # case 12:
-                #     # delete
-                #     if cloud.product_cloud.datacenter.tag == 'HZ':
-                #         pass
-                #     pass
-                # case 13:
-                #     # update
-                #     if cloud.product_cloud.datacenter.tag == 'HZ':
-                #         pass
-                #     pass
-
-
-
-
-
+            if cloud.product_cloud.datacenter.tag == 'HZ':
+                response = cloud.hetzner_actions(action=action, more=more)
+            else:
+                response = {'error': 'can not found datacenter tag.'}
+            if 'error' in response:
+                return Response(response, status=HTTP_204_NO_CONTENT)
+            return Response({
+                'cloud': self.serializer_class(instance=self.get_object(cloudservice_id)).data,
+                'action': response
+            }, status=HTTP_200_OK)

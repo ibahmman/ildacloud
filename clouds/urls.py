@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import CloudsAPIView, CloudGetAPIView, CloudProductsAPIView, CloudProductsGetAPIView
+from .views import (CloudsAPIView, CloudGetAPIView, CloudProductsAPIView, CloudProductsGetAPIView,
+                    CloudActionAPIView)
 
 app_name = 'clouds'
 urlpatterns = [
@@ -7,4 +8,5 @@ urlpatterns = [
     path('products-get/<str:pk>/', CloudProductsGetAPIView.as_view(), name='apiv1-clouds-products-get'),
     path('', CloudsAPIView.as_view(), name='apiv1-clouds-list'),
     path('get/<str:pk>/', CloudGetAPIView.as_view(), name='apiv1-cloud-get'),
+    path('action/', CloudActionAPIView.as_view(), name='api-cloud-action')
 ]
