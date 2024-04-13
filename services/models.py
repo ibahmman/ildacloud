@@ -85,27 +85,31 @@ class Service(models.Model):
             product = Product.objects.get(name=product)
             self.product_main = product
             self.save()
-        except:
-            return False
-        else:
             return True
+        except:
+            return False  
 
     def last_pay_update(self):
-        amount = self.product_main.price_amount
-        if self.period == 'hourly': amount = self.product_main.price_amount / 30 / 24
-        elif self.period == 'daily': amount = self.product_main.price_amount / 30
-        elif self.period == 'monthly': amount = self.product_main.price_amount
-        if self.user.wallet.reduce_balance(amount):
-            self.lastpay_at = now()
-            self.save()
-
-            # if not self.delivered_at:
-            #     self.deliver()
+        try:
+            amount = self.product_main.price_amount
+            if self.period == 'hourly': amount = self.product_main.price_amount / 30 / 24
+            elif self.period == 'daily': amount = self.product_main.price_amount / 30
+            elif self.period == 'monthly': amount = self.product_main.price_amount
+            if self.user.wallet.reduce_balance(amount):
+                self.lastpay_at = now()
+                self.save()
+                return True
+        except:
+            return False
+        return False
 
     def deliver(self, *args, **kwargs):
-        self.delivered_at = now()
-        self.save()
-
+        try:
+            self.delivered_at = now()
+            self.save()
+            return True
+        except:
+            return False
 
 class SCloud(Service):
     product_cloud = models.ForeignKey(PCloud, models.DO_NOTHING)
@@ -122,12 +126,14 @@ class SCloud(Service):
                 assert 'id' in cloud['server'], 'server do not to create in datacenter.'
                 self.cloud_id = cloud['server']['id']
                 self.root_password = cloud['root_password']
+                self.delivered_at = now()
                 self.save()
                 return cloud
             except AssertionError as e:
                 return {'error': str(e)}
             except:
                 return {'error': 'exception in create cloud and deliver.'}
+        return {'error': 'datacenter not found.'}
 
     def delete(self):
         if self.product_cloud.datacenter.tag == 'HZ':
@@ -141,6 +147,7 @@ class SCloud(Service):
                 return {'error': str(e)}
             except:
                 return {'error': 'exception in delete server.'}
+        return {'error': 'datacenter not found.'}
 
     def change_type(self, product):
         if super().change_type(product.upper()):
@@ -149,16 +156,15 @@ class SCloud(Service):
                 self.product_cloud = product_cloud
                 self.save()
             except:
-                return False
+                return {'error': 'can not to setting up.'}
             else:
                 cloud = HZCloud(server_id=self.cloud_id)
                 response = cloud.change_type_server(product_cloud.name.lower())
-                print(response)
                 return response
-                # return True
+        return {'error': 'can not to setting up.'}
 
     def hetzner_actions(self, action, more=None):
-        response = {'error': ':)'}
+        response = {'error': 'action not found.'}
         match action:
             case 'stop':
                 # stop
