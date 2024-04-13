@@ -139,7 +139,6 @@ class CloudActionAPIView(APIView):
     permission_classes = (IsAuthenticated, )    # IsOwnerOrAdminUser
     serializer_class = CloudSerializer 
     model = serializer_class.Meta.model
-    # model_service = Service
 
     ACTIONS = ['stop', 'shutdown', 'start', 'reboot', 'restart', 'rebuild', 'passwd',
                'ipv4', 'ipv6', 'ptr4', 'console']   # , 'create', 'delete', 'update'
@@ -149,19 +148,17 @@ class CloudActionAPIView(APIView):
         return self.model.objects.get(id=cloud_id)
 
     def post(self, request):
-        cloudservice_id = request.data['cloud']
-        action = request.data['action']
-        more = str(request.data['more']).lower() if 'more' in request.data else 'ildacloud.chelseru.com'
-
         try:
+            assert 'cloud' in request.data, 'cloud is required.'
+            assert 'actiom' in request.data, 'action is required.'
+            cloudservice_id = request.data['cloud']
+            action = request.data['action']
+            more = str(request.data['more']).lower() if 'more' in request.data else 'ildacloud.chelseru.com'
             cloud = self.get_object(cloudservice_id)
-            # service = self.model_service.objects.get(id=cloud.id)
-            assert isinstance(int(action), int), 'action should be int.'
-            action = int(action)
-            assert action in range(14), 'invalid action. between 0-13'
-            if action == 5:
-                # rebuild
-                assert more in self.OS_LIST, 'invalid os name or id.'
+            assert action in self.ACTIONS, 'action is not currect.'
+    
+            if action == 'rebuild':
+                assert more in self.OS_LIST, 'invalid os tag.'
             
         except AssertionError as e:
             return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
@@ -173,8 +170,10 @@ class CloudActionAPIView(APIView):
                 response = cloud.hetzner_actions(action=action, more=more)
             else:
                 response = {'error': 'can not found datacenter tag.'}
+
             if 'error' in response:
                 return Response(response, status=HTTP_204_NO_CONTENT)
+            
             return Response({
                 'cloud': self.serializer_class(instance=self.get_object(cloudservice_id)).data,
                 'action': response

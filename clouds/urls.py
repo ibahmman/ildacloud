@@ -8,5 +8,5 @@ urlpatterns = [
     path('products-get/<str:pk>/', CloudProductsGetAPIView.as_view(), name='apiv1-clouds-products-get'),
     path('', CloudsAPIView.as_view(), name='apiv1-clouds-list'),
     path('get/<str:pk>/', CloudGetAPIView.as_view(), name='apiv1-cloud-get'),
-    path('action/', CloudActionAPIView.as_view(), name='api-cloud-action')
+    path('actions/', CloudActionAPIView.as_view(), name='api-cloud-action')
 ]

@@ -160,48 +160,48 @@ class SCloud(Service):
     def hetzner_actions(self, action, more=None):
         response = {'error': ':)'}
         match action:
-            case 0:
+            case 'stop':
                 # stop
                 hzcloud = HZCloud(server_id=self.cloud_id)
                 response = hzcloud.power_off_server()
-            case 1:
+            case 'shutdown':
                 # shutdown
                 hzcloud = HZCloud(server_id=self.cloud_id)
                 response = hzcloud.shutdown_server()
-            case 2:
+            case 'start':
                 # start
                 hzcloud = HZCloud(server_id=self.cloud_id)
                 response = hzcloud.power_on_server()
-            case 3:
+            case 'reboot':
                 # reboot
                 hzcloud = HZCloud(server_id=self.cloud_id)
                 response = hzcloud.hard_restart_server()
-            case 4:
+            case 'restart':
                 # restart
                 hzcloud = HZCloud(server_id=self.cloud_id)
                 response = hzcloud.soft_reboot_server()
-            case 5:
+            case 'rebuild':
                 # rebuild
                 hzcloud = HZCloud(server_id=self.cloud_id)
                 response = hzcloud.rebuild_server(more)
-            case 6:
+            case 'passwd':
                 # passwd
                 hzcloud = HZCloud(server_id=self.cloud_id)
                 response = hzcloud.reset_passwd_server()
                 # need for set to model (cloud) and save.
                 self.root_password = response['root_password']
                 self.save()
-            case 7:
+            case 'ipv4':
                 # ipv4
                 pass
-            case 8:
+            case 'ipv6':
                 # ipv6
                 pass
-            case 9:
+            case 'ptr4':
                 # ptr4
                 hzcloud = HZCloud(server_id=self.cloud_id)
                 response = hzcloud.change_ptr(dns_ptr=more)
-            case 10:
+            case 'console':
                 # console
                 hzcloud = HZCloud(server_id=self.cloud_id)
                 response = hzcloud.request_console_server()
